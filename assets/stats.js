@@ -69,6 +69,16 @@ function render() {
     const tdRes = document.createElement("td");
     tdRes.innerHTML = pillResult(m.result);
 
+    const tdView = document.createElement("td");
+    if (m.eventId) {
+      const a = document.createElement("a");
+      a.href = `./match.html?eventId=${encodeURIComponent(m.eventId)}`;
+      a.textContent = m.cachedStats ? "View (cached)" : "View";
+      tdView.appendChild(a);
+    } else {
+      tdView.textContent = "—";
+    }
+
     const tdDel = document.createElement("td");
     const btn = document.createElement("button");
     btn.className = "secondary";
@@ -79,7 +89,7 @@ function render() {
     });
     tdDel.appendChild(btn);
 
-    tr.append(tdDate, tdMatch, tdLeague, tdVenue, tdRes, tdDel);
+    tr.append(tdDate, tdMatch, tdLeague, tdVenue, tdRes, tdView, tdDel);
     tbody.appendChild(tr);
   }
 
