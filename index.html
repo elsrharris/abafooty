@@ -11,7 +11,7 @@
     <div class="wrap nav">
       <div class="brand">
         <strong>Dad Football Tracker</strong>
-        <span class="muted">Leeds United • searches + match visits</span>
+        <span class="muted">Leeds United • add match visits</span>
       </div>
       <div class="tabs">
         <a class="tab" href="./index.html">Home</a>
@@ -22,26 +22,24 @@
 
   <main>
     <div class="wrap grid">
-
       <section class="card">
-        <h2>Find a Leeds match to add</h2>
+        <h2>Find a match to add</h2>
+        <p class="muted" style="margin-top:0">
+          This pulls matches from the Premier League (league id 47) and filters to Leeds United (team id 8463).
+        </p>
 
         <div class="row">
           <div>
-            <label for="season">Season (year)</label>
-            <input id="season" type="number" min="2010" max="2100" />
+            <label for="leagueId">League ID</label>
+            <input id="leagueId" type="number" value="47" />
           </div>
           <div>
-            <label for="from">From (optional)</label>
-            <input id="from" type="date" />
+            <label for="teamId">Team ID (Leeds)</label>
+            <input id="teamId" type="number" value="8463" />
           </div>
-          <div>
-            <label for="to">To (optional)</label>
-            <input id="to" type="date" />
-          </div>
-          <div style="min-width: 140px; flex: 0 0 160px;">
+          <div style="min-width: 140px; flex: 0 0 180px;">
             <label>&nbsp;</label>
-            <button id="searchBtn">Search fixtures</button>
+            <button id="searchBtn">Load matches</button>
           </div>
         </div>
 
@@ -53,7 +51,7 @@
               <tr>
                 <th>Date</th>
                 <th>Match</th>
-                <th>Comp</th>
+                <th>League</th>
                 <th>Venue</th>
                 <th>Score</th>
                 <th></th>
