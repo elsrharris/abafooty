@@ -2,8 +2,8 @@
 const API_HOST = "free-api-live-football-data.p.rapidapi.com";
 const API_BASE = `https://${API_HOST}`;
 
-// IMPORTANT: paste your RapidAPI key here locally (do NOT commit publicly if you can avoid it)
-const RAPIDAPI_KEY = "PASTE_YOUR_RAPIDAPI_KEY_HERE";
+// IMPORTANT: rotate this key and replace it (don’t leave real keys in code/repos)
+const RAPIDAPI_KEY = "ab0e509211msh236be082d98284bp181843jsnb107450cf09e";
 
 // Known IDs from your API responses:
 export const PREMIER_LEAGUE_ID = 47;
