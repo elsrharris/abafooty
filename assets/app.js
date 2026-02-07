@@ -2,14 +2,13 @@
 const API_HOST = "api-football-v1.p.rapidapi.com";
 const API_BASE = `https://${API_HOST}/v3`;
 
-// Store keys locally (fine for a personal GitHub Pages app).
-// If you ever want it private, I can show you a tiny free proxy to hide the key.
+// ====== API KEY (hard-coded) ======
+const RAPIDAPI_KEY = "PASTE_YOUR_RAPIDAPI_KEY_HERE";
+
 export function getApiKey() {
-  return localStorage.getItem("rapidapi_key") || "";
+  return RAPIDAPI_KEY;
 }
-export function setApiKey(k) {
-  localStorage.setItem("rapidapi_key", (k || "").trim());
-}
+
 
 // ====== API CALL ======
 export async function apiGet(path, params = {}) {
