@@ -3,25 +3,12 @@
 // =====================================================
 const API_HOST = "free-api-live-football-data.p.rapidapi.com";
 const API_BASE = `https://${API_HOST}`;
-
-// 🔐 Paste your NEW RapidAPI key here
-// (rotate the old one first in RapidAPI)
 const RAPIDAPI_KEY = "ab0e509211msh236be082d98284bp181843jsnb107450cf09e";
 
-// Known IDs (confirmed from your API responses)
-export const PREMIER_LEAGUE_ID = 47;
-export const LEEDS_TEAM_ID = 8463;
-
-// =====================================================
-// Core API helper (THIS is where your snippet belongs)
-// =====================================================
 export async function apiGet(path, params = {}) {
   const url = new URL(API_BASE + path);
-
   for (const [k, v] of Object.entries(params)) {
-    if (v !== undefined && v !== null && v !== "") {
-      url.searchParams.set(k, v);
-    }
+    if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, v);
   }
 
   const res = await fetch(url.toString(), {
@@ -33,6 +20,7 @@ export async function apiGet(path, params = {}) {
     },
   });
 
+  // Helpful error details (RapidAPI usually returns a message body)
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`HTTP ${res.status} ${res.statusText} — ${body}`);
