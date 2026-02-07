@@ -1,10 +1,4 @@
-import { apiGet, getApiKey, setApiKey, getLeedsTeamId, fmtDate, upsertAttended } from "./app.js";
-
-const $ = (id) => document.getElementById(id);
-
-const apiKeyInput = $("apiKey");
-const saveKeyBtn = $("saveKeyBtn");
-const settingsMsg = $("settingsMsg");
+import { apiGet, getLeedsTeamId, fmtDate, upsertAttended } from "./app.js";
 
 const seasonInput = $("season");
 const fromInput = $("from");
