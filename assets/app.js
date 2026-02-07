@@ -1,6 +1,6 @@
 // ====== CONFIG ======
-const API_HOST = "api-football-v1.p.rapidapi.com";
-const API_BASE = `https://${API_HOST}/v3`;
+const API_HOST = "free-api-live-football-data.p.rapidapi.com";
+const API_BASE = `https://${API_HOST}`; // no /v3 for this API
 
 // ====== API KEY (hard-coded) ======
 const RAPIDAPI_KEY = "PASTE_YOUR_RAPIDAPI_KEY_HERE";
