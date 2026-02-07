@@ -146,14 +146,5 @@ async function runSearch() {
   }
 }
 
-// Init
-apiKeyInput.value = getApiKey();
-seasonInput.value = currentSeasonGuess();
-
-saveKeyBtn.addEventListener("click", () => {
-  setApiKey(apiKeyInput.value);
-  toast(settingsMsg, "Saved. You can now search fixtures.");
-  setTimeout(() => (settingsMsg.style.display = "none"), 2500);
-});
 
 searchBtn.addEventListener("click", runSearch);
