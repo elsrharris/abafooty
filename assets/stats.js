@@ -21,13 +21,12 @@ function countBy(list, keyFn) {
     const k = keyFn(x) || "Unknown";
     map.set(k, (map.get(k) || 0) + 1);
   }
-  return [...map.entries()].sort((a,b) => b[1]-a[1]);
+  return [...map.entries()].sort((a, b) => b[1] - a[1]);
 }
 
 function render() {
   const attended = loadAttended();
 
-  // KPIs
   const total = attended.length;
   const home = attended.filter(m => m.venue === "Home").length;
   const away = attended.filter(m => m.venue === "Away").length;
@@ -46,10 +45,9 @@ function render() {
     kpi(total, "Matches attended"),
     kpi(`${home} / ${away}`, "Home / Away"),
     kpi(`${wins}-${draws}-${losses}`, "W-D-L (finished only)"),
-    kpi(`${gf}-${ga}`, "Goals For-Against (finished only)"),
+    kpi(`${gf}-${ga}`, "Goals For-Against (finished only)")
   );
 
-  // List
   const tbody = $("list");
   tbody.innerHTML = "";
 
@@ -62,8 +60,8 @@ function render() {
     const tdMatch = document.createElement("td");
     tdMatch.textContent = `${safeText(m.homeTeam)} vs ${safeText(m.awayTeam)}`;
 
-    const tdComp = document.createElement("td");
-    tdComp.textContent = safeText(m.league);
+    const tdLeague = document.createElement("td");
+    tdLeague.textContent = safeText(m.leagueName);
 
     const tdVenue = document.createElement("td");
     tdVenue.textContent = safeText(m.venue);
@@ -76,24 +74,23 @@ function render() {
     btn.className = "secondary";
     btn.textContent = "Remove";
     btn.addEventListener("click", () => {
-      removeAttended(m.fixtureId);
+      removeAttended(m.eventId);
       render();
     });
     tdDel.appendChild(btn);
 
-    tr.append(tdDate, tdMatch, tdComp, tdVenue, tdRes, tdDel);
+    tr.append(tdDate, tdMatch, tdLeague, tdVenue, tdRes, tdDel);
     tbody.appendChild(tr);
   }
 
-  // Breakdowns
-  const byComp = countBy(attended, m => m.league);
-  $("byComp").innerHTML = byComp.length
-    ? byComp.map(([k,v]) => `<div>${safeText(k)}: <strong>${v}</strong></div>`).join("")
+  const byLeague = countBy(attended, m => m.leagueName);
+  $("byLeague").innerHTML = byLeague.length
+    ? byLeague.map(([k, v]) => `<div>${safeText(k)}: <strong>${v}</strong></div>`).join("")
     : "No matches yet.";
 
   const byVenue = countBy(attended, m => m.venue);
   $("byVenue").innerHTML = byVenue.length
-    ? byVenue.map(([k,v]) => `<div>${safeText(k)}: <strong>${v}</strong></div>`).join("")
+    ? byVenue.map(([k, v]) => `<div>${safeText(k)}: <strong>${v}</strong></div>`).join("")
     : "No matches yet.";
 }
 
