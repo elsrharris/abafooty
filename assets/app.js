@@ -6,7 +6,7 @@ const API_BASE = `https://${API_HOST}`;
 
 // 🔐 Paste your NEW RapidAPI key here
 // (rotate the old one first in RapidAPI)
-const RAPIDAPI_KEY = "PASTE_NEW_KEY_HERE";
+const RAPIDAPI_KEY = "ab0e509211msh236be082d98284bp181843jsnb107450cf09e";
 
 // Known IDs (confirmed from your API responses)
 export const PREMIER_LEAGUE_ID = 47;
