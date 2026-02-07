@@ -1,11 +1,17 @@
-import { apiGet, getLeedsTeamId, fmtDate, upsertAttended } from "./app.js";
+import {
+  getMatchesByLeague,
+  fmtDate,
+  upsertAttended,
+  PREMIER_LEAGUE_ID,
+  LEEDS_TEAM_ID
+} from "./app.js";
 
-const seasonInput = $("season");
-const fromInput = $("from");
-const toInput = $("to");
+const $ = (id) => document.getElementById(id);
+
+const leagueIdInput = $("leagueId");
+const teamIdInput = $("teamId");
 const searchBtn = $("searchBtn");
 const searchMsg = $("searchMsg");
-
 const resultsTable = $("resultsTable");
 const resultsBody = $("resultsBody");
 
@@ -14,131 +20,139 @@ function toast(el, msg, show = true) {
   el.style.display = show ? "block" : "none";
 }
 
-function currentSeasonGuess() {
-  // Leeds season is just a year value in API-Football.
-  // Use current UTC year; user can adjust.
-  const now = new Date();
-  return now.getUTCFullYear();
+function normalizeMatchList(data) {
+  // Different endpoints sometimes return different keys.
+  // We try a few common shapes.
+  return (
+    data?.response?.matches ||
+    data?.response?.allMatches ||
+    data?.response?.list ||
+    data?.response?.result ||
+    data?.response ||
+    []
+  );
 }
 
-function scoreText(fx) {
-  const g = fx?.goals;
-  if (!g || (g.home == null && g.away == null)) return "—";
-  return `${g.home ?? 0}-${g.away ?? 0}`;
+function getTeams(m) {
+  // FotMob-like objects can vary; handle both nested and flat.
+  const home = m.home || m.homeTeam || { id: m.hId, name: m.hTeam };
+  const away = m.away || m.awayTeam || { id: m.aId, name: m.aTeam };
+  return { home, away };
 }
 
-function venueText(fx, leedsId) {
-  const homeId = fx?.teams?.home?.id;
-  if (!homeId || !leedsId) return "—";
-  return homeId === leedsId ? "Home" : "Away";
+function getEventId(m) {
+  return m.id ?? m.eventId ?? m.matchId ?? m.gameId ?? m.ongoing?.id;
 }
 
-function opponentName(fx, leedsId) {
-  const home = fx?.teams?.home;
-  const away = fx?.teams?.away;
-  if (home?.id === leedsId) return away?.name || "Unknown";
-  return home?.name || "Unknown";
+function getDate(m) {
+  return m?.status?.utcTime || m?.utcTime || m?.time || m?.date || m?.startTimeUTC || "";
 }
 
-function compName(fx) {
-  const l = fx?.league;
-  if (!l) return "—";
-  return `${l.name}${l.round ? " • " + l.round : ""}`;
+function getScore(m) {
+  // Sometimes FotMob returns scoreStr; sometimes flat scores.
+  const s = m?.status?.scoreStr || m?.scoreStr || null;
+  if (s) return s;
+
+  const h = m?.homeScore ?? m?.hScore ?? null;
+  const a = m?.awayScore ?? m?.aScore ?? null;
+  if (h == null && a == null) return "—";
+  return `${h ?? 0}-${a ?? 0}`;
 }
 
-function buildMatchRecord(fx, leeds) {
-  const leedsId = leeds.teamId;
-  const home = fx.teams.home;
-  const away = fx.teams.away;
-  const isHome = home.id === leedsId;
+function isTeamMatch(m, teamId) {
+  const { home, away } = getTeams(m);
+  const hId = home?.id ?? m?.hId;
+  const aId = away?.id ?? m?.aId;
+  return Number(hId) === Number(teamId) || Number(aId) === Number(teamId);
+}
 
-  // W/D/L only makes sense for finished matches
-  const homeGoals = fx.goals?.home;
-  const awayGoals = fx.goals?.away;
-  let result = null;
-  if (homeGoals != null && awayGoals != null) {
-    const leedsGoals = isHome ? homeGoals : awayGoals;
-    const oppGoals = isHome ? awayGoals : homeGoals;
-    result = leedsGoals > oppGoals ? "W" : leedsGoals < oppGoals ? "L" : "D";
-  }
-
-  return {
-    fixtureId: fx.fixture.id,
-    date: fx.fixture.date,
-    league: fx.league?.name || "",
-    round: fx.league?.round || "",
-    season: fx.league?.season,
-    venue: isHome ? "Home" : "Away",
-    opponent: opponentName(fx, leedsId),
-    leedsGoals: (homeGoals == null || awayGoals == null) ? null : (isHome ? homeGoals : awayGoals),
-    oppGoals: (homeGoals == null || awayGoals == null) ? null : (isHome ? awayGoals : homeGoals),
-    result, // "W" | "D" | "L" | null
-    homeTeam: home?.name || "",
-    awayTeam: away?.name || "",
-  };
+function resultFromScores(leedsIsHome, h, a) {
+  if (h == null || a == null) return null;
+  const leedsGoals = leedsIsHome ? h : a;
+  const oppGoals = leedsIsHome ? a : h;
+  return leedsGoals > oppGoals ? "W" : leedsGoals < oppGoals ? "L" : "D";
 }
 
 async function runSearch() {
   resultsBody.innerHTML = "";
   resultsTable.style.display = "none";
 
+  const leagueId = Number(leagueIdInput.value || PREMIER_LEAGUE_ID);
+  const teamId = Number(teamIdInput.value || LEEDS_TEAM_ID);
+
   try {
-    if (!getApiKey()) throw new Error("Add your RapidAPI key first (above).");
+    toast(searchMsg, "Loading league matches…");
 
-    toast(searchMsg, "Finding Leeds United team id…");
-    const leeds = await getLeedsTeamId();
+    const data = await getMatchesByLeague(leagueId);
+    const matches = normalizeMatchList(data);
 
-    const season = seasonInput.value || currentSeasonGuess();
-    const params = { team: leeds.teamId, season };
+    const filtered = (Array.isArray(matches) ? matches : []).filter(m => isTeamMatch(m, teamId));
 
-    // API-Football fixtures supports date range filtering via from/to in many examples/docs. :contentReference[oaicite:3]{index=3}
-    if (fromInput.value) params.from = fromInput.value;
-    if (toInput.value) params.to = toInput.value;
-
-    toast(searchMsg, "Loading fixtures…");
-    const data = await apiGet("/fixtures", params);
-    const fixtures = data.response || [];
-
-    if (!fixtures.length) {
-      toast(searchMsg, "No fixtures found for that range/season.");
+    if (!filtered.length) {
+      toast(searchMsg, "No matches found for that team in this league response.");
       return;
     }
 
-    toast(searchMsg, `Found ${fixtures.length} fixtures. Click “Add” for games he attended.`);
+    toast(searchMsg, `Found ${filtered.length} matches. Click “Add” for the ones he attended.`);
     resultsTable.style.display = "table";
 
-    for (const item of fixtures) {
-      const fx = item; // API-Football returns a fixture object with fixture/teams/league/goals etc.
+    for (const m of filtered) {
+      const { home, away } = getTeams(m);
+      const eventId = getEventId(m);
+      const date = getDate(m);
+
+      const homeId = home?.id ?? m?.hId;
+      const leedsIsHome = Number(homeId) === teamId;
+
+      const hScore = m?.homeScore ?? m?.hScore ?? null;
+      const aScore = m?.awayScore ?? m?.aScore ?? null;
+
+      const record = {
+        eventId,
+        date,
+        leagueId,
+        leagueName: "Premier League",
+        venue: leedsIsHome ? "Home" : "Away",
+        homeTeam: home?.name ?? m?.hTeam ?? "?",
+        awayTeam: away?.name ?? m?.aTeam ?? "?",
+        leedsGoals: (hScore == null || aScore == null) ? null : (leedsIsHome ? hScore : aScore),
+        oppGoals: (hScore == null || aScore == null) ? null : (leedsIsHome ? aScore : hScore),
+        result: resultFromScores(leedsIsHome, hScore, aScore),
+      };
+
       const tr = document.createElement("tr");
 
       const tdDate = document.createElement("td");
-      tdDate.textContent = fmtDate(fx.fixture?.date);
+      tdDate.textContent = fmtDate(date);
 
       const tdMatch = document.createElement("td");
-      tdMatch.textContent = `${fx.teams?.home?.name || "?"} vs ${fx.teams?.away?.name || "?"}`;
+      tdMatch.textContent = `${record.homeTeam} vs ${record.awayTeam}`;
 
-      const tdComp = document.createElement("td");
-      tdComp.textContent = compName(fx);
+      const tdLeague = document.createElement("td");
+      tdLeague.textContent = record.leagueName;
 
       const tdVenue = document.createElement("td");
-      tdVenue.textContent = venueText(fx, leeds.teamId);
+      tdVenue.textContent = record.venue;
 
       const tdScore = document.createElement("td");
-      tdScore.textContent = scoreText(fx);
+      tdScore.textContent = getScore(m);
 
       const tdBtn = document.createElement("td");
       const btn = document.createElement("button");
       btn.className = "secondary";
       btn.textContent = "Add";
       btn.addEventListener("click", () => {
-        const rec = buildMatchRecord(fx, leeds);
-        upsertAttended(rec);
+        if (!record.eventId) {
+          toast(searchMsg, "This match didn’t include an eventId in the response. Paste one match object here and I’ll map it.");
+          return;
+        }
+        upsertAttended(record);
         btn.textContent = "Added ✓";
         btn.disabled = true;
       });
       tdBtn.appendChild(btn);
 
-      tr.append(tdDate, tdMatch, tdComp, tdVenue, tdScore, tdBtn);
+      tr.append(tdDate, tdMatch, tdLeague, tdVenue, tdScore, tdBtn);
       resultsBody.appendChild(tr);
     }
   } catch (e) {
@@ -146,5 +160,6 @@ async function runSearch() {
   }
 }
 
-
+leagueIdInput.value = PREMIER_LEAGUE_ID;
+teamIdInput.value = LEEDS_TEAM_ID;
 searchBtn.addEventListener("click", runSearch);
