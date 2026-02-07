@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Match detail</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <strong>Match detail</strong>
+        <span class="muted" id="subhead">Loading…</span>
+      </div>
+      <div class="tabs">
+        <a class="tab" href="./index.html">Home</a>
+        <a class="tab" href="./stats.html">Stats</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap grid">
+      <section class="card" id="summaryCard">
+        <h2 id="matchTitle">Loading…</h2>
+        <div class="row">
+          <div>
+            <div class="muted">Date</div>
+            <div id="matchDate"></div>
+          </div>
+          <div>
+            <div class="muted">League</div>
+            <div id="matchLeague"></div>
+          </div>
+          <div>
+            <div class="muted">Venue</div>
+            <div id="matchVenue"></div>
+          </div>
+          <div>
+            <div class="muted">Result</div>
+            <div id="matchResult"></div>
+          </div>
+        </div>
+
+        <div id="errorBox" class="toast" style="display:none;"></div>
+
+        <div class="row" style="margin-top:12px;">
+          <div style="min-width: 220px; flex: 0 0 260px;">
+            <button id="loadStatsBtn">Load detailed stats</button>
+          </div>
+          <div>
+            <div class="muted" style="font-size:13px;">
+              Stats are cached after first load so you don’t waste requests.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="statsContainer" style="display:none;">
+        <h2>Detailed stats</h2>
+        <div id="statsSections"></div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="./assets/match.js"></script>
+</body>
+</html>
