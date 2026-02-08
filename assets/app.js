@@ -62,6 +62,17 @@ export async function getMatchAllStats(eventId) {
   });
 }
 
+// Popular leagues dropdown
+export async function getPopularLeagues() {
+  return apiGet("/football-popular-leagues");
+}
+
+// Teams dropdown (by league)
+export async function getTeamsByLeague(leagueId) {
+  return apiGet("/football-get-list-all-team", { leagueid: leagueId });
+}
+
+
 // =====================================================
 // LOCAL STORAGE (attended matches)
 // =====================================================
