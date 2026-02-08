@@ -11,7 +11,7 @@
     <div class="wrap nav">
       <div class="brand">
         <strong>Dad Football Tracker</strong>
-        <span class="muted">Pick a league + team, add attended games</span>
+        <span class="muted">Default: Leeds + Premier League</span>
       </div>
       <div class="tabs">
         <a class="tab" href="./index.html">Home</a>
@@ -25,24 +25,61 @@
       <section class="card">
         <h2>Add a match</h2>
         <p class="muted" style="margin-top:0">
-          Choose a league, then a team. We’ll load league matches and filter them to your team.
+          Click “Load matches” to fetch fixtures for the selected league and filter to the selected team.
         </p>
 
+        <!-- Defaults (always visible) -->
         <div class="row">
           <div>
-            <label for="leagueSelect">League</label>
-            <select id="leagueSelect"></select>
+            <label for="leagueId">League ID</label>
+            <input id="leagueId" type="number" />
+            <div class="muted" style="margin-top:6px; font-size:12px;">
+              Default: Premier League = 47
+            </div>
           </div>
+
           <div>
-            <label for="teamSelect">Team</label>
-            <select id="teamSelect" disabled></select>
+            <label for="teamId">Team ID</label>
+            <input id="teamId" type="number" />
+            <div class="muted" style="margin-top:6px; font-size:12px;">
+              Default: Leeds United = 8463
+            </div>
           </div>
 
           <div style="min-width: 140px; flex: 0 0 180px;">
             <label>&nbsp;</label>
-            <button id="loadMatchesBtn" disabled>Load matches</button>
+            <button id="loadMatchesBtn">Load matches</button>
           </div>
         </div>
+
+        <!-- Optional selector (below) -->
+        <details style="margin-top:14px;">
+          <summary class="muted" style="cursor:pointer;">
+            Change league/team (optional)
+          </summary>
+
+          <div class="row" style="margin-top:12px;">
+            <div>
+              <label for="leagueSelect">League (preset list)</label>
+              <select id="leagueSelect"></select>
+              <div class="muted" style="margin-top:6px; font-size:12px;">
+                (We’re not using “popular leagues” endpoint because it’s returning 503.)
+              </div>
+            </div>
+
+            <div>
+              <label for="teamSelect">Team (loads from league)</label>
+              <select id="teamSelect" disabled></select>
+            </div>
+
+            <div style="min-width: 140px; flex: 0 0 180px;">
+              <label>&nbsp;</label>
+              <button id="applySelectionBtn" class="secondary" disabled>
+                Use this team
+              </button>
+            </div>
+          </div>
+        </details>
 
         <div id="msg" class="toast muted" style="display:none;"></div>
 
