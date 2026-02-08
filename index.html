@@ -11,7 +11,7 @@
     <div class="wrap nav">
       <div class="brand">
         <strong>Dad Football Tracker</strong>
-        <span class="muted">Leeds United • add match visits</span>
+        <span class="muted">Pick a league + team, add attended games</span>
       </div>
       <div class="tabs">
         <a class="tab" href="./index.html">Home</a>
@@ -23,27 +23,29 @@
   <main>
     <div class="wrap grid">
       <section class="card">
-        <h2>Find a match to add</h2>
+        <h2>Add a match</h2>
         <p class="muted" style="margin-top:0">
-          This pulls matches from the Premier League (league id 47) and filters to Leeds United (team id 8463).
+          Choose a league, then a team. We’ll load league matches and filter them to your team.
         </p>
 
         <div class="row">
           <div>
-            <label for="leagueId">League ID</label>
-            <input id="leagueId" type="number" value="47" />
+            <label for="leagueSelect">League</label>
+            <select id="leagueSelect"></select>
           </div>
+
           <div>
-            <label for="teamId">Team ID (Leeds)</label>
-            <input id="teamId" type="number" value="8463" />
+            <label for="teamSelect">Team</label>
+            <select id="teamSelect" disabled></select>
           </div>
+
           <div style="min-width: 140px; flex: 0 0 180px;">
             <label>&nbsp;</label>
-            <button id="searchBtn">Load matches</button>
+            <button id="loadMatchesBtn" disabled>Load matches</button>
           </div>
         </div>
 
-        <div id="searchMsg" class="toast muted" style="display:none;"></div>
+        <div id="msg" class="toast muted" style="display:none;"></div>
 
         <div style="margin-top: 12px; overflow:auto;">
           <table class="table" id="resultsTable" style="display:none;">
