@@ -24,20 +24,31 @@ function countBy(list, keyFn) {
   return [...map.entries()].sort((a, b) => b[1] - a[1]);
 }
 
+// Backwards-compatible helpers (older saved matches used leedsGoals)
+function getTeamGoals(m) {
+  return m.teamGoals ?? m.leedsGoals ?? null;
+}
+function getOppGoals(m) {
+  return m.oppGoals ?? null;
+}
+
 function render() {
   const attended = loadAttended();
 
   const total = attended.length;
-  const home = attended.filter(m => m.venue === "Home").length;
-  const away = attended.filter(m => m.venue === "Away").length;
+  const home = attended.filter((m) => m.venue === "Home").length;
+  const away = attended.filter((m) => m.venue === "Away").length;
 
-  const finished = attended.filter(m => m.result);
-  const wins = finished.filter(m => m.result === "W").length;
-  const draws = finished.filter(m => m.result === "D").length;
-  const losses = finished.filter(m => m.result === "L").length;
+  const finished = attended.filter((m) => m.result);
+  const wins = finished.filter((m) => m.result === "W").length;
+  const draws = finished.filter((m) => m.result === "D").length;
+  const losses = finished.filter((m) => m.result === "L").length;
 
-  const gf = finished.reduce((s, m) => s + (m.leedsGoals ?? 0), 0);
-  const ga = finished.reduce((s, m) => s + (m.oppGoals ?? 0), 0);
+  const gf = finished.reduce((s, m) => s + (getTeamGoals(m) ?? 0), 0);
+  const ga = finished.reduce((s, m) => s + (getOppGoals(m) ?? 0), 0);
+
+  // If multiple teams are being tracked, this helps show what’s in the data
+  const teamsTracked = countBy(attended, (m) => m.teamName || "Unknown team");
 
   const kpis = $("kpis");
   kpis.innerHTML = "";
@@ -47,6 +58,18 @@ function render() {
     kpi(`${wins}-${draws}-${losses}`, "W-D-L (finished only)"),
     kpi(`${gf}-${ga}`, "Goals For-Against (finished only)")
   );
+
+  // Optionally show what teams are in the dataset (useful now you can choose any team)
+  // If you don’t want this, delete this next block.
+  if (teamsTracked.length > 1) {
+    const note = document.createElement("div");
+    note.className = "toast muted";
+    note.style.marginTop = "12px";
+    note.innerHTML =
+      `<strong>Teams tracked:</strong><br>` +
+      teamsTracked.map(([k, v]) => `${safeText(k)}: <strong>${v}</strong>`).join("<br>");
+    kpis.parentElement.appendChild(note);
+  }
 
   const tbody = $("list");
   tbody.innerHTML = "";
@@ -93,12 +116,12 @@ function render() {
     tbody.appendChild(tr);
   }
 
-  const byLeague = countBy(attended, m => m.leagueName);
+  const byLeague = countBy(attended, (m) => m.leagueName);
   $("byLeague").innerHTML = byLeague.length
     ? byLeague.map(([k, v]) => `<div>${safeText(k)}: <strong>${v}</strong></div>`).join("")
     : "No matches yet.";
 
-  const byVenue = countBy(attended, m => m.venue);
+  const byVenue = countBy(attended, (m) => m.venue);
   $("byVenue").innerHTML = byVenue.length
     ? byVenue.map(([k, v]) => `<div>${safeText(k)}: <strong>${v}</strong></div>`).join("")
     : "No matches yet.";
