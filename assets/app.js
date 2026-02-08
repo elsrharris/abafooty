@@ -27,7 +27,7 @@ export async function apiGet(path, params = {}) {
   const res = await fetch(url.toString(), {
     method: "GET",
     headers: {
-      "X-RapidAPI-Key": "ab0e509211msh236be082d98284bp181843jsnb107450cf09e",
+      "X-RapidAPI-Key": RAPIDAPI_KEY,
       "X-RapidAPI-Host": API_HOST,
       "Accept": "application/json",
     },
